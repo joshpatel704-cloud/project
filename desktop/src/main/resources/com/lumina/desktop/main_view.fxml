@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/fxml" fx:controller="com.lumina.desktop.Controller" 
+      prefWidth="900" prefHeight="650" styleClass="main-container" spacing="20">
+    <padding>
+        <Insets top="30" right="40" bottom="30" left="40"/>
+    </padding>
+
+    <HBox alignment="CENTER_LEFT" spacing="20">
+        <StackPane styleClass="logo-box" prefWidth="40" prefHeight="40">
+            <Text text="R" style="-fx-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;"/>
+        </StackPane>
+        <VBox>
+            <Text text="RateXpro" styleClass="header-text"/>
+            <Text text="Real-time currency intelligence" styleClass="sub-header"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS" />
+        <Button text="SYNC RATES" styleClass="nav-button" onAction="#handleConvert" />
+    </HBox>
+
+    <HBox spacing="30">
+        <!-- Left Column: Converter -->
+        <VBox styleClass="glass-card" prefWidth="400" spacing="20">
+            <Text text="Currency Converter" style="-fx-fill: white; -fx-font-size: 18px;"/>
+            
+            <VBox spacing="5">
+                <Label text="AMOUNT" styleClass="sub-header" />
+                <TextField fx:id="amountField" promptText="0.00" styleClass="input-field" />
+            </VBox>
+
+            <VBox spacing="12" alignment="CENTER">
+                <VBox spacing="5" alignment="CENTER_LEFT" maxWidth="Infinity">
+                    <Label text="FROM" styleClass="sub-header" />
+                    <ComboBox fx:id="fromCurrency" maxWidth="Infinity" styleClass="input-field" />
+                </VBox>
+                
+                <StackPane styleClass="logo-box" prefWidth="44" prefHeight="44" maxHeight="44" maxWidth="44" onMouseClicked="#handleSwap" cursor="HAND">
+                    <Text text="⇄" style="-fx-fill: white; -fx-font-size: 20px;" rotate="90" />
+                </StackPane>
+
+                <VBox spacing="5" alignment="CENTER_LEFT" maxWidth="Infinity">
+                    <Label text="TO" styleClass="sub-header" />
+                    <ComboBox fx:id="toCurrency" maxWidth="Infinity" styleClass="input-field" />
+                </VBox>
+            </VBox>
+
+            <Button fx:id="convertButton" text="Convert Now" maxWidth="Infinity" 
+                    styleClass="convert-button" onAction="#handleConvert" prefHeight="50"/>
+            
+            <HBox alignment="CENTER_RIGHT">
+                <Text fx:id="resultText" text="0.0000" style="-fx-fill: white; -fx-font-size: 36px; -fx-font-weight: bold;" />
+            </HBox>
+        </VBox>
+
+        <!-- Right Column: Visuals -->
+        <VBox spacing="20" HBox.hgrow="ALWAYS">
+            <VBox styleClass="glass-card" VBox.vgrow="ALWAYS" spacing="15">
+                <HBox alignment="CENTER_LEFT" spacing="15">
+                    <VBox spacing="2">
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Text fx:id="chartTitle" text="USD to EUR Chart" style="-fx-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;"/>
+                            <StackPane styleClass="badge-green">
+                                <Text fx:id="chartChange" text="+0.00%" style="-fx-fill: #4CAF50; -fx-font-size: 10px; -fx-font-weight: bold;"/>
+                            </StackPane>
+                        </HBox>
+                        <Text text="REAL-TIME MARKET ANALYSIS" styleClass="sub-header"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS" />
+                    <HBox styleClass="segmented-control">
+                        <ToggleButton text="1W" styleClass="segmented-button" onAction="#handleTimeFilter"/>
+                        <ToggleButton text="1M" styleClass="segmented-button" selected="true" onAction="#handleTimeFilter"/>
+                        <ToggleButton text="1Y" styleClass="segmented-button" onAction="#handleTimeFilter"/>
+                        <ToggleButton text="5Y" styleClass="segmented-button" onAction="#handleTimeFilter"/>
+                    </HBox>
+                </HBox>
+
+                <LineChart fx:id="performanceChart" styleClass="chart" VBox.vgrow="ALWAYS" createSymbols="false">
+                    <xAxis><CategoryAxis side="BOTTOM" /></xAxis>
+                    <yAxis><NumberAxis side="LEFT" forceZeroInRange="false" /></yAxis>
+                </LineChart>
+            </VBox>
+        </VBox>
+    </HBox>
+</VBox>

@@ -1,0 +1,152 @@
+.root {
+    -fx-background-color: transparent;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.main-container {
+    -fx-background-color: rgba(5, 5, 5, 0.85); /* Deep dark with transparency */
+    -fx-background-radius: 30;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 30;
+    -fx-border-width: 1;
+}
+
+.glass-card {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-radius: 20;
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-radius: 20;
+    -fx-padding: 20;
+}
+
+.header-text {
+    -fx-fill: white;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.sub-header {
+    -fx-fill: rgba(255, 255, 255, 0.4);
+    -fx-font-size: 11px;
+    -fx-font-weight: normal;
+    -fx-letter-spacing: 1px;
+}
+
+.logo-box {
+    -fx-background-color: linear-gradient(to bottom right, #3b82f6, #2563eb);
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(three-pass-box, rgba(59, 130, 246, 0.4), 10, 0, 0, 0);
+}
+
+.input-field {
+    -fx-background-color: rgba(255, 255, 255, 0.03);
+    -fx-background-radius: 15;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 15;
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-padding: 10;
+}
+
+.input-field:focused {
+    -fx-border-color: #f97316;
+}
+
+.convert-button {
+    -fx-background-color: linear-gradient(to right, #3b82f6, #2563eb);
+    -fx-background-radius: 40;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(59, 130, 246, 0.3), 15, 0, 0, 0);
+    -fx-padding: 15 40;
+}
+
+.convert-button:hover {
+    -fx-background-color: linear-gradient(to right, #4f8ff7, #3b82f6);
+}
+
+.convert-button:pressed {
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(255, 255, 255, 0.4);
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+}
+
+.nav-button:hover {
+    -fx-text-fill: white;
+}
+
+.nav-button-active {
+    -fx-background-color: #3b82f6;
+    -fx-background-radius: 10;
+    -fx-text-fill: white;
+}
+
+.segmented-control {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-background-radius: 12;
+    -fx-padding: 2;
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-radius: 12;
+}
+
+.segmented-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(255, 255, 255, 0.4);
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 5 12;
+    -fx-background-radius: 10;
+}
+
+.segmented-button:selected {
+    -fx-background-color: #3b82f6;
+    -fx-text-fill: white;
+}
+
+.badge-green {
+    -fx-background-color: rgba(76, 175, 80, 0.15);
+    -fx-background-radius: 10;
+    -fx-padding: 2 8;
+}
+
+/* Charts styling */
+.chart {
+    -fx-padding: 10;
+}
+
+.chart-series-line {
+    -fx-stroke: #3b82f6;
+    -fx-stroke-width: 2.5px;
+    -fx-effect: dropshadow(three-pass-box, rgba(59, 130, 246, 0.4), 10, 0.5, 0, 0);
+}
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.chart-vertical-grid-lines {
+    -fx-stroke: transparent;
+}
+
+.chart-horizontal-grid-lines {
+    -fx-stroke: rgba(255, 255, 255, 0.05);
+    -fx-stroke-dash-array: 2 4;
+}
+
+.axis {
+    -fx-tick-label-fill: rgba(255, 255, 255, 0.3);
+    -fx-tick-mark-visible: false;
+    -fx-border-color: transparent;
+}
+
+.axis-label {
+    -fx-text-fill: rgba(255, 255, 255, 0.3);
+}
