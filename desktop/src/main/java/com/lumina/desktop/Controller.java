@@ -1,11 +1,13 @@
 package com.lumina.desktop;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
 import com.lumina.desktop.service.ChartService;
@@ -19,6 +21,7 @@ public class Controller {
     @FXML private Button convertButton;
     @FXML private Text resultText;
     @FXML private LineChart<String, Number> performanceChart;
+    @FXML private VBox emptyState;
     @FXML private Text chartTitle;
     @FXML private Text chartChange;
 
@@ -98,18 +101,24 @@ public class Controller {
         XYChart.Series<String, Number> series = chartService.generateSeries(from, to);
         System.out.println("[DESKTOP-CHART] Generated series with " + series.getData().size() + " data points");
         
-        if (!series.getData().isEmpty()) {
+        boolean hasData = !series.getData().isEmpty();
+        performanceChart.setVisible(hasData);
+        emptyState.setVisible(!hasData);
+        
+        if (hasData) {
             double firstVal = series.getData().get(0).getYValue().doubleValue();
             double lastVal = series.getData().get(series.getData().size() - 1).getYValue().doubleValue();
             double diff = ((lastVal - firstVal) / firstVal) * 100;
             chartChange.setText(String.format("%s%.2f%%", diff >= 0 ? "+" : "", diff));
             chartChange.setStyle(diff >= 0 ? "-fx-fill: #4CAF50;" : "-fx-fill: #F44336;");
+            chartChange.getParent().setVisible(true);
             
             performanceChart.getData().add(series);
             System.out.println("[DESKTOP-CHART] Series added to chart");
         } else {
             System.err.println("[DESKTOP-CHART] No data found to display");
             chartChange.setText("0.00%");
+            chartChange.getParent().setVisible(false);
         }
     }
 

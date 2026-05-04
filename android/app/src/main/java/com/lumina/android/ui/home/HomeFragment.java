@@ -122,40 +122,41 @@ public class HomeFragment extends Fragment implements CurrencyController.View {
                 android.util.Log.d("CHART_API", "Received raw data size: " + result.size());
                 
                 chartService.prepareChartData(result, to, data -> {
-                    if (data.yValues.length == 0) {
-                        android.util.Log.d("CHART", "No displayable entries found");
-                        requireActivity().runOnUiThread(() -> {
-                            binding.chart.clear();
-                            binding.chart.setNoDataText("No historical data available");
-                            binding.chart.invalidate();
-                        });
-                        return;
-                    }
-
-                    android.util.Log.d("CHART", "Preparing to render entries: " + data.yValues.length);
-
-                    List<Entry> entries = new ArrayList<>();
-                    for (int i = 0; i < data.yValues.length; i++) {
-                        entries.add(new Entry(i, data.yValues[i]));
-                    }
-
-                    LineDataSet dataSet = new LineDataSet(entries, "Exchange Rate");
-                    // ... set styles ...
-                    dataSet.setColor(Color.parseColor("#3B82F6"));
-                    dataSet.setLineWidth(2.5f);
-                    dataSet.setDrawCircles(false);
-                    dataSet.setDrawValues(false);
-                    dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
-                    dataSet.setDrawFilled(true);
-                    dataSet.setFillColor(Color.parseColor("#3B82F6"));
-                    dataSet.setFillAlpha(30);
-                    
-                    dataSet.setHighlightEnabled(true);
-                    dataSet.setHighLightColor(Color.WHITE);
-                    dataSet.setDrawHorizontalHighlightIndicator(false);
-                    dataSet.setDrawVerticalHighlightIndicator(true);
-
                     requireActivity().runOnUiThread(() -> {
+                        if (data.yValues.length == 0) {
+                            android.util.Log.d("CHART", "No displayable entries found");
+                            binding.chart.setVisibility(View.GONE);
+                            binding.llEmptyState.setVisibility(View.VISIBLE);
+                            binding.tvChartChange.setVisibility(View.GONE);
+                            return;
+                        }
+
+                        binding.chart.setVisibility(View.VISIBLE);
+                        binding.llEmptyState.setVisibility(View.GONE);
+                        binding.tvChartChange.setVisibility(View.VISIBLE);
+
+                        android.util.Log.d("CHART", "Preparing to render entries: " + data.yValues.length);
+
+                        List<Entry> entries = new ArrayList<>();
+                        for (int i = 0; i < data.yValues.length; i++) {
+                            entries.add(new Entry(i, data.yValues[i]));
+                        }
+
+                        LineDataSet dataSet = new LineDataSet(entries, "Exchange Rate");
+                        dataSet.setColor(Color.parseColor("#3B82F6"));
+                        dataSet.setLineWidth(2.5f);
+                        dataSet.setDrawCircles(false);
+                        dataSet.setDrawValues(false);
+                        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+                        dataSet.setDrawFilled(true);
+                        dataSet.setFillColor(Color.parseColor("#3B82F6"));
+                        dataSet.setFillAlpha(30);
+                        
+                        dataSet.setHighlightEnabled(true);
+                        dataSet.setHighLightColor(Color.WHITE);
+                        dataSet.setDrawHorizontalHighlightIndicator(false);
+                        dataSet.setDrawVerticalHighlightIndicator(true);
+
                         binding.tvChartChange.setText(String.format("%s%.2f%%", data.percentageChange >= 0 ? "+" : "", data.percentageChange));
                         binding.tvChartChange.setTextColor(data.percentageChange >= 0 ? Color.parseColor("#4CAF50") : Color.parseColor("#F44336"));
 

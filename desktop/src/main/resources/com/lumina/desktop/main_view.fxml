@@ -80,10 +80,15 @@
                     </HBox>
                 </HBox>
 
-                <LineChart fx:id="performanceChart" styleClass="chart" VBox.vgrow="ALWAYS" createSymbols="false">
-                    <xAxis><CategoryAxis side="BOTTOM" /></xAxis>
-                    <yAxis><NumberAxis side="LEFT" forceZeroInRange="false" /></yAxis>
-                </LineChart>
+                <StackPane VBox.vgrow="ALWAYS">
+                    <LineChart fx:id="performanceChart" styleClass="chart" createSymbols="false">
+                        <xAxis><CategoryAxis side="BOTTOM" /></xAxis>
+                        <yAxis><NumberAxis side="LEFT" forceZeroInRange="false" /></yAxis>
+                    </LineChart>
+                    <VBox fx:id="emptyState" alignment="CENTER" spacing="10" visible="false" style="-fx-background-color: rgba(11, 14, 20, 0.4); -fx-background-radius: 12; -fx-border-color: rgba(255, 255, 255, 0.1); -fx-border-style: dashed; -fx-border-radius: 12;">
+                        <Text text="NO HISTORICAL DATA AVAILABLE FOR THIS PAIR" style="-fx-fill: rgba(255, 255, 255, 0.6); -fx-font-size: 10px; -fx-font-weight: bold;" />
+                    </VBox>
+                </StackPane>
             </VBox>
         </VBox>
     </HBox>

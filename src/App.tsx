@@ -341,10 +341,14 @@ const HomeScreen = () => {
               )}
 
               {!historyLoading && historyData.length === 0 && (
-                <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#0b0e14]/40 rounded-xl border border-white/5 border-dashed">
-                  <div className="text-center opacity-40">
-                    <Globe size={24} className="mx-auto mb-2 text-white/50" />
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-white/60">No historical data available for this pair</p>
+                <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#05070a]/80 rounded-2xl border-2 border-white/5 border-dashed shadow-2xl backdrop-blur-md">
+                  <div className="text-center px-6">
+                    <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
+                      <Globe size={32} className="text-white/40" />
+                    </div>
+                    <p className="text-[11px] font-medium uppercase tracking-[3px] text-white/50 leading-relaxed max-w-[200px] mx-auto">
+                      No Historical Data Available For This Pair
+                    </p>
                   </div>
                 </div>
               )}
