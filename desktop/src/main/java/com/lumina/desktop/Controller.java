@@ -8,6 +8,9 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
 
+import com.lumina.desktop.service.ChartService;
+import com.lumina.desktop.service.ChartServiceImpl;
+
 public class Controller {
 
     @FXML private TextField amountField;
@@ -18,6 +21,14 @@ public class Controller {
     @FXML private LineChart<String, Number> performanceChart;
     @FXML private Text chartTitle;
     @FXML private Text chartChange;
+
+    private final CurrencyService currencyService;
+    private final ChartService chartService;
+
+    public Controller() {
+        this.currencyService = new MockCurrencyService();
+        this.chartService = new ChartServiceImpl();
+    }
 
     @FXML
     public void initialize() {
@@ -53,12 +64,24 @@ public class Controller {
 
     @FXML
     private void handleConvert() {
-        String amount = amountField.getText();
-        if (amount != null && !amount.isEmpty()) {
-            double rate = 0.9423; // Mock rate
-            double result = Double.parseDouble(amount) * rate;
-            resultText.setText(String.format("%.4f", result));
-            updateChart();
+        String amountText = amountField.getText();
+        if (amountText == null || amountText.isEmpty()) return;
+
+        try {
+            double amount = Double.parseDouble(amountText);
+            String fromFull = fromCurrency.getValue();
+            String toFull = toCurrency.getValue();
+            String from = fromFull.split(" - ")[0];
+            String to = toFull.split(" - ")[0];
+
+            currencyService.convert(from, to, amount).thenAccept(result -> {
+                Platform.runLater(() -> {
+                    resultText.setText(String.format("%.4f", result.getResult()));
+                    updateChart();
+                });
+            });
+        } catch (NumberFormatException e) {
+            resultText.setText("Invalid input");
         }
     }
 
@@ -70,19 +93,15 @@ public class Controller {
         String to = toFull.split(" - ")[0];
         chartTitle.setText(from + " to " + to + " Chart");
 
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName(from + "/" + to);
+        XYChart.Series<String, Number> series = chartService.generateSeries(from, to);
         
-        double currentVal = 0.9 + Math.random() * 0.1;
-        double firstVal = currentVal;
-        for (int i = 1; i <= 15; i++) {
-            currentVal += (Math.random() - 0.5) * 0.02;
-            series.getData().add(new XYChart.Data<>("" + (i + 15), currentVal));
+        if (!series.getData().isEmpty()) {
+            double firstVal = series.getData().get(0).getYValue().doubleValue();
+            double lastVal = series.getData().get(series.getData().size() - 1).getYValue().doubleValue();
+            double diff = ((lastVal - firstVal) / firstVal) * 100;
+            chartChange.setText(String.format("%s%.2f%%", diff >= 0 ? "+" : "", diff));
+            chartChange.setStyle(diff >= 0 ? "-fx-fill: #4CAF50;" : "-fx-fill: #F44336;");
         }
-        
-        double diff = ((currentVal - firstVal) / firstVal) * 100;
-        chartChange.setText(String.format("%s%.2f%%", diff >= 0 ? "+" : "", diff));
-        chartChange.setStyle(diff >= 0 ? "-fx-fill: #4CAF50;" : "-fx-fill: #F44336;");
 
         performanceChart.getData().add(series);
     }
