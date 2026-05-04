@@ -58,11 +58,18 @@ async function startServer() {
     const { base, symbol, days } = req.query;
     const history: any = {};
     const d = parseInt(days as string) || 30;
+    
+    let lastVal = 0.92 + Math.random() * 0.05;
+    const s = (symbol as string) || 'EUR';
+
     for (let i = 0; i < d; i++) {
         const date = new Date();
         date.setDate(date.getDate() - (d - i));
         const dateStr = date.toISOString().split('T')[0];
-        history[dateStr] = { [symbol as string]: 0.92 + Math.random() * 0.05 };
+        
+        // Random walk for more realistic chart
+        lastVal += (Math.random() - 0.5) * 0.01;
+        history[dateStr] = { [s]: Math.max(0.0001, lastVal) };
     }
     res.json(history);
   });

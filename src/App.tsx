@@ -26,12 +26,15 @@ const HomeScreen = () => {
   const [from, setFrom] = useState('USD');
   const [to, setTo] = useState('EUR');
   const [result, setResult] = useState<number | null>(null);
+  const [conversionRate, setConversionRate] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [timeFilter, setTimeFilter] = useState('1M');
   const [chartData, setChartData] = useState<number[]>([]);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
   const handleConvert = async () => {
+    if (!amount || isNaN(parseFloat(amount))) return;
     setLoading(true);
     try {
       const response = await fetch('/api/v1/currency/convert', {
@@ -41,7 +44,7 @@ const HomeScreen = () => {
       });
       const data = await response.json();
       setResult(data.result);
-      fetchHistory();
+      setConversionRate(data.rate);
     } catch (error) {
       console.error("Conversion failed", error);
     } finally {
@@ -50,14 +53,23 @@ const HomeScreen = () => {
   };
 
   const fetchHistory = async () => {
+    setHistoryLoading(true);
     try {
       const days = timeFilter === '1W' ? 7 : timeFilter === '1M' ? 30 : timeFilter === '1Y' ? 365 : 1825;
       const res = await fetch(`/api/v1/currency/historical-rates?base=${from}&symbol=${to}&days=${days}`);
+      if (!res.ok) throw new Error("API responded with error");
       const data = await res.json();
-      const points = Object.values(data).map((v: any) => v[to]);
+      
+      const points = Object.values(data)
+        .map((v: any) => v[to])
+        .filter((val): val is number => typeof val === 'number' && !isNaN(val));
+      
       setChartData(points);
     } catch (e) {
       console.error("History fetch failed", e);
+      setChartData([]);
+    } finally {
+      setHistoryLoading(false);
     }
   };
 
@@ -78,7 +90,7 @@ const HomeScreen = () => {
     const height = 150;
     const padding = 20;
     const chartHeight = height - padding * 2;
-    const step = width / (chartData.length - 1);
+    const step = chartData.length > 1 ? width / (chartData.length - 1) : 0;
     
     const points = chartData.map((val, i) => {
       const x = i * step;
@@ -242,7 +254,11 @@ const HomeScreen = () => {
                       <span className="text-5xl font-bold text-white tracking-tight">{result?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                       <span className="text-2xl font-bold text-blue-500 uppercase">{to}</span>
                     </div>
-                    <p className="text-xs text-white/30 mt-2 font-mono italic">1 {from} = {(result! / parseFloat(amount || '1')).toFixed(4)} {to}</p>
+                    {conversionRate && (
+                      <p className="text-xs text-white/30 mt-2 font-mono italic">
+                        1 {from} = {conversionRate.toFixed(4)} {to}
+                      </p>
+                    )}
                   </>
                 )}
               </div>
@@ -295,6 +311,14 @@ const HomeScreen = () => {
             </div>
             
             <div className={`h-64 w-full relative group cursor-crosshair`}>
+              {historyLoading && (
+                <div className="absolute inset-0 z-30 flex items-center justify-center bg-[#0b0e14]/50 rounded-xl backdrop-blur-sm">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Retrieving Historical Analytics...</p>
+                  </div>
+                </div>
+              )}
               <svg 
                 className="w-full h-full overflow-visible" 
                 viewBox="0 0 400 150" 
