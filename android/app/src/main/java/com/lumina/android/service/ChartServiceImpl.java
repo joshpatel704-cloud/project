@@ -26,11 +26,17 @@ public class ChartServiceImpl implements ChartService {
             }
         }
 
+        // Trim arrays to actual data size
+        float[] trimmedY = new float[i];
+        String[] trimmedX = new String[i];
+        System.arraycopy(yValues, 0, trimmedY, 0, i);
+        System.arraycopy(xLabels, 0, trimmedX, 0, i);
+
         double change = 0;
         if (firstVal != null && lastVal != null && firstVal != 0) {
             change = ((lastVal - firstVal) / firstVal) * 100;
         }
 
-        callback.onDataPrepared(new ChartData(yValues, xLabels, change));
+        callback.onDataPrepared(new ChartData(trimmedY, trimmedX, change));
     }
 }

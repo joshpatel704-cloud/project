@@ -71,6 +71,8 @@ const HomeScreen = () => {
       
       // Sort keys chronologically
       const sortedKeys = Object.keys(data).sort();
+      console.log(`[CHART] Raw data keys: ${sortedKeys.length}`);
+      
       const points = sortedKeys
         .map(key => ({
           date: key,
@@ -78,10 +80,12 @@ const HomeScreen = () => {
         }))
         .filter(p => typeof p.value === 'number' && !isNaN(p.value));
       
+      console.log(`[CHART] Filtered points: ${points.length}`);
+      
       setChartData(points.map(p => p.value));
       setHistoryData(points); // New state for Recharts
     } catch (e) {
-      console.error("History fetch failed", e);
+      console.error("[CHART] History fetch failed", e);
       setChartData([]);
       setHistoryData([]);
     } finally {
@@ -332,6 +336,15 @@ const HomeScreen = () => {
                   <div className="flex flex-col items-center gap-4 text-center">
                     <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
                     <p className="text-[10px] font-bold text-white/40 uppercase tracking-[2px]">Synthesizing Historical Vectors...</p>
+                  </div>
+                </div>
+              )}
+
+              {!historyLoading && historyData.length === 0 && (
+                <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#0b0e14]/40 rounded-xl border border-white/5 border-dashed">
+                  <div className="text-center opacity-40">
+                    <Globe size={24} className="mx-auto mb-2 text-white/50" />
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-white/60">No historical data available for this pair</p>
                   </div>
                 </div>
               )}

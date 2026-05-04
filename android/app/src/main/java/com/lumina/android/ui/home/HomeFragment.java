@@ -119,16 +119,28 @@ public class HomeFragment extends Fragment implements CurrencyController.View {
         currencyService.getHistoricalRates(from, to, days, new CurrencyService.Callback<Map<String, Map<String, Double>>>() {
             @Override
             public void onSuccess(Map<String, Map<String, Double>> result) {
+                android.util.Log.d("CHART_API", "Received raw data size: " + result.size());
+                
                 chartService.prepareChartData(result, to, data -> {
+                    if (data.yValues.length == 0) {
+                        android.util.Log.d("CHART", "No displayable entries found");
+                        requireActivity().runOnUiThread(() -> {
+                            binding.chart.clear();
+                            binding.chart.setNoDataText("No historical data available");
+                            binding.chart.invalidate();
+                        });
+                        return;
+                    }
+
+                    android.util.Log.d("CHART", "Preparing to render entries: " + data.yValues.length);
+
                     List<Entry> entries = new ArrayList<>();
                     for (int i = 0; i < data.yValues.length; i++) {
                         entries.add(new Entry(i, data.yValues[i]));
                     }
 
-                    binding.tvChartChange.setText(String.format("%s%.2f%%", data.percentageChange >= 0 ? "+" : "", data.percentageChange));
-                    binding.tvChartChange.setTextColor(data.percentageChange >= 0 ? Color.parseColor("#4CAF50") : Color.parseColor("#F44336"));
-
                     LineDataSet dataSet = new LineDataSet(entries, "Exchange Rate");
+                    // ... set styles ...
                     dataSet.setColor(Color.parseColor("#3B82F6"));
                     dataSet.setLineWidth(2.5f);
                     dataSet.setDrawCircles(false);
@@ -143,13 +155,19 @@ public class HomeFragment extends Fragment implements CurrencyController.View {
                     dataSet.setDrawHorizontalHighlightIndicator(false);
                     dataSet.setDrawVerticalHighlightIndicator(true);
 
-                    binding.chart.setData(new LineData(dataSet));
-                    binding.chart.animateX(800);
-                    
-                    if (binding.chart.getMarker() instanceof ChartMarkerView) {
-                        ((ChartMarkerView) binding.chart.getMarker()).setSymbol(to);
-                    }
-                    binding.chart.invalidate();
+                    requireActivity().runOnUiThread(() -> {
+                        binding.tvChartChange.setText(String.format("%s%.2f%%", data.percentageChange >= 0 ? "+" : "", data.percentageChange));
+                        binding.tvChartChange.setTextColor(data.percentageChange >= 0 ? Color.parseColor("#4CAF50") : Color.parseColor("#F44336"));
+
+                        binding.chart.setData(new LineData(dataSet));
+                        binding.chart.animateX(800);
+                        
+                        if (binding.chart.getMarker() instanceof ChartMarkerView) {
+                            ((ChartMarkerView) binding.chart.getMarker()).setSymbol(to);
+                        }
+                        binding.chart.invalidate();
+                        android.util.Log.d("CHART", "Chart refreshed and invalidated on UI thread");
+                    });
                 });
             }
 

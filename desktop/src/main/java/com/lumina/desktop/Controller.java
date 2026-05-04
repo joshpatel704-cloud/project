@@ -86,7 +86,9 @@ public class Controller {
     }
 
     private void updateChart() {
+        System.out.println("[DESKTOP-CHART] Clearing old series data...");
         performanceChart.getData().clear();
+        
         String fromFull = fromCurrency.getValue();
         String toFull = toCurrency.getValue();
         String from = fromFull.split(" - ")[0];
@@ -94,6 +96,7 @@ public class Controller {
         chartTitle.setText(from + " to " + to + " Chart");
 
         XYChart.Series<String, Number> series = chartService.generateSeries(from, to);
+        System.out.println("[DESKTOP-CHART] Generated series with " + series.getData().size() + " data points");
         
         if (!series.getData().isEmpty()) {
             double firstVal = series.getData().get(0).getYValue().doubleValue();
@@ -101,9 +104,13 @@ public class Controller {
             double diff = ((lastVal - firstVal) / firstVal) * 100;
             chartChange.setText(String.format("%s%.2f%%", diff >= 0 ? "+" : "", diff));
             chartChange.setStyle(diff >= 0 ? "-fx-fill: #4CAF50;" : "-fx-fill: #F44336;");
+            
+            performanceChart.getData().add(series);
+            System.out.println("[DESKTOP-CHART] Series added to chart");
+        } else {
+            System.err.println("[DESKTOP-CHART] No data found to display");
+            chartChange.setText("0.00%");
         }
-
-        performanceChart.getData().add(series);
     }
 
     private void setupChart() {
