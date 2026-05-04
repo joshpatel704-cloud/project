@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { 
+  AreaChart, 
+  Area, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer 
+} from 'recharts';
 import { Home, ArrowRightLeft, Globe, HelpCircle } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -31,6 +39,7 @@ const HomeScreen = () => {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [timeFilter, setTimeFilter] = useState('1M');
   const [chartData, setChartData] = useState<number[]>([]);
+  const [historyData, setHistoryData] = useState<{date: string, value: number}[]>([]);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
   const handleConvert = async () => {
@@ -60,14 +69,21 @@ const HomeScreen = () => {
       if (!res.ok) throw new Error("API responded with error");
       const data = await res.json();
       
-      const points = Object.values(data)
-        .map((v: any) => v[to])
-        .filter((val): val is number => typeof val === 'number' && !isNaN(val));
+      // Sort keys chronologically
+      const sortedKeys = Object.keys(data).sort();
+      const points = sortedKeys
+        .map(key => ({
+          date: key,
+          value: data[key][to]
+        }))
+        .filter(p => typeof p.value === 'number' && !isNaN(p.value));
       
-      setChartData(points);
+      setChartData(points.map(p => p.value));
+      setHistoryData(points); // New state for Recharts
     } catch (e) {
       console.error("History fetch failed", e);
       setChartData([]);
+      setHistoryData([]);
     } finally {
       setHistoryLoading(false);
     }
@@ -310,120 +326,59 @@ const HomeScreen = () => {
               </div>
             </div>
             
-            <div className={`h-64 w-full relative group cursor-crosshair`}>
+            <div className="h-64 w-full relative group">
               {historyLoading && (
-                <div className="absolute inset-0 z-30 flex items-center justify-center bg-[#0b0e14]/50 rounded-xl backdrop-blur-sm">
-                  <div className="flex flex-col items-center gap-4">
+                <div className="absolute inset-0 z-30 flex items-center justify-center bg-[#0b0e14]/70 rounded-xl backdrop-blur-sm">
+                  <div className="flex flex-col items-center gap-4 text-center">
                     <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Retrieving Historical Analytics...</p>
+                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-[2px]">Synthesizing Historical Vectors...</p>
                   </div>
                 </div>
               )}
-              <svg 
-                className="w-full h-full overflow-visible" 
-                viewBox="0 0 400 150" 
-                preserveAspectRatio="none"
-                onMouseMove={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const x = ((e.clientX - rect.left) / rect.width) * 400;
-                  const step = 400 / (chartData.length - 1);
-                  const index = Math.round(x / step);
-                  if (index >= 0 && index < chartData.length) {
-                    setHoverIndex(index);
-                  }
-                }}
-                onMouseLeave={() => setHoverIndex(null)}
-              >
-                <defs>
-                  <linearGradient id="chartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" style={{ stopColor: '#3b82f6', stopOpacity: 0.3 }} />
-                    <stop offset="100%" style={{ stopColor: '#3b82f6', stopOpacity: 0 }} />
-                  </linearGradient>
-                  <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="3" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                  </filter>
-                </defs>
-
-                {/* Horizontal Grid Lines */}
-                {[0, 1, 2, 3].map((i) => (
-                  <line 
-                    key={i}
-                    x1="0" y1={20 + (i * 110) / 3}
-                    x2="400" y2={20 + (i * 110) / 3}
-                    stroke="white"
-                    strokeOpacity="0.05"
-                    strokeWidth="1"
-                    strokeDasharray="4 4"
+              
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={historyData}>
+                  <defs>
+                    <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                  <XAxis 
+                    dataKey="date" 
+                    hide 
                   />
-                ))}
-                
-                {/* Area Fill */}
-                <path 
-                  d={`${generatePath()} V 150 H 0 Z`} 
-                  fill="url(#chartGrad)" 
-                  className="transition-all duration-700 ease-in-out"
-                />
-
-                {/* Glowing Line */}
-                <motion.path 
-                  key={timeFilter + from + to}
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: 1 }}
-                  d={generatePath()} 
-                  fill="none" 
-                  stroke="#3b82f6" 
-                  strokeWidth="2.5" 
-                  strokeLinecap="round"
-                  filter="url(#glow)"
-                  className="transition-all duration-700 ease-in-out"
-                />
-
-                {/* Crosshair & Tooltip */}
-                {hoverIndex !== null && chartData.length > 0 && (
-                  <g>
-                    <line 
-                      x1={(hoverIndex * 400) / (chartData.length - 1)} 
-                      y1="0" 
-                      x2={(hoverIndex * 400) / (chartData.length - 1)} 
-                      y2="150" 
-                      stroke="white" 
-                      strokeOpacity="0.2" 
-                      strokeWidth="1"
-                      strokeDasharray="2 2"
-                    />
-                    <circle 
-                      cx={(hoverIndex * 400) / (chartData.length - 1)} 
-                      cy={150 - ((chartData[hoverIndex] - Math.min(...chartData)) / (Math.max(...chartData) - Math.min(...chartData) || 1) * (150 - 20 * 2) + 20)} 
-                      r="5" 
-                      fill="#3b82f6"
-                      filter="url(#glow)"
-                    />
-                    <foreignObject 
-                      x={Math.min(Math.max((hoverIndex * 400) / (chartData.length - 1) - 60, 0), 280)} 
-                      y={Math.max(150 - ((chartData[hoverIndex] - Math.min(...chartData)) / (Math.max(...chartData) - Math.min(...chartData) || 1) * 110 + 20) - 60, -10)} 
-                      width="120" 
-                      height="50"
-                    >
-                      <div className="bg-[#1a1f3c] border border-white/10 rounded-lg p-2 shadow-xl backdrop-blur-md">
-                        <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest">{timeFilter === '1W' ? 'Daily Point' : 'Market Data'}</p>
-                        <p className="text-xs font-bold text-white">{chartData[hoverIndex].toFixed(6)} {to}</p>
-                      </div>
-                    </foreignObject>
-                  </g>
-                )}
-
-                {/* Marker Points (Subtle - only at end if not hovering) */}
-                {hoverIndex === null && chartData.length > 0 && (
-                  <circle 
-                    cx={400} 
-                    cy={150 - ((chartData[chartData.length - 1] - Math.min(...chartData)) / (Math.max(...chartData) - Math.min(...chartData) || 1) * (150 - 20 * 2) + 20)} 
-                    r="4" 
-                    fill="#3b82f6" 
-                    className="animate-pulse"
+                  <YAxis 
+                    hide 
+                    domain={['auto', 'auto']}
                   />
-                )}
-              </svg>
+                  <Tooltip 
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="bg-[#1a1f3c] border border-white/20 rounded-lg p-2 shadow-2xl backdrop-blur-md min-w-[120px]">
+                            <p className="text-[8px] font-black text-white/40 uppercase tracking-[1.5px] mb-0.5">{payload[0].payload.date}</p>
+                            <p className="text-[13px] font-bold text-white tabular-nums">
+                              {Number(payload[0].value).toFixed(6)} <span className="text-[10px] text-blue-400">{to}</span>
+                            </p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="value" 
+                    stroke="#3b82f6" 
+                    strokeWidth={3}
+                    fillOpacity={1} 
+                    fill="url(#colorVal)" 
+                    animationDuration={1000}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </GlassCard>
 
